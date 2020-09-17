@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import TodoItem from './TodoItem';
 
 const TodoContainer = () => {
   // 入力されたテキストを管理
@@ -18,7 +19,7 @@ const TodoContainer = () => {
     <>
       <div className="list-container">
         {todoItems.map((item, i) => (
-          <div key={i}>{item}</div>
+          <TodoItem key={i} value={item} />
         ))}
       </div>
       <input type="text" value={input} onChange={handleInput} />
