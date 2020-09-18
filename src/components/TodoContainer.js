@@ -1,31 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
+import todoReducer from '../reducers/TodoReducer';
 import TodoItem from './TodoItem';
 
 const TodoContainer = () => {
   // 入力されたテキストを管理
   const [input, setInput] = useState('');
+  // todoItemsとメッセージをreducerで管理する
+  const [todoState, dispatch] = useReducer(todoReducer, { todoItems: [], messge: '' });
   // Todoリストを管理
-  const [todoItems, setTodoItems] = useState([]);
+  // const [todoItems, setTodoItems] = useState([]);
   // 件数表示のメッセージ
-  const [message, setMessage] = useState('');
+  // const [message, setMessage] = useState('');
 
   useEffect(() => {
-    setMessage(`TODO LIST: ${todoItems.length}件`);
-  }, [todoItems.length]);
+    dispatch({ type: 'UPDATE_MESSAGE', message: `TODO LIST: ${todoState.todoItems.length}件` });
+    // setMessage(`TODO LIST: ${todoItems.length}件`);
+  }, [todoState.todoItems.length]);
 
   const handleInput = e => {
     setInput(e.target.value);
   };
 
   const addItem = () => {
-    setTodoItems(prev => [...prev, input]);
+    // setTodoItems(prev => [...prev, input]);
+    dispatch({ type: 'ADD_TODO', value: input });
   };
 
   return (
     <>
-      <p>{message}</p>
+      <p>{todoState.message}</p>
       <div className="list-container">
-        {todoItems.map((item, i) => (
+        {todoState.todoItems.map((item, i) => (
           <TodoItem key={i} value={item} />
         ))}
       </div>
