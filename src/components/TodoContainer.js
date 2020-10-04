@@ -1,5 +1,6 @@
 import React, { useEffect, useReducer, useState } from 'react';
 import todoReducer from '../reducers/TodoReducer';
+import Timer from './Timer';
 import TodoItem from './TodoItem';
 
 const TodoContainer = () => {
@@ -11,6 +12,8 @@ const TodoContainer = () => {
   // const [todoItems, setTodoItems] = useState([]);
   // 件数表示のメッセージ
   // const [message, setMessage] = useState('');
+
+  const [showTimer, setShowTimer] = useState(true);
 
   useEffect(() => {
     dispatch({ type: 'UPDATE_MESSAGE', message: `TODO LIST: ${todoState.todoItems.length}件` });
@@ -28,6 +31,8 @@ const TodoContainer = () => {
 
   return (
     <>
+      <button onClick={() => setShowTimer(!showTimer)}>timer表示</button>
+      {showTimer && <Timer></Timer>}
       <p>{todoState.message}</p>
       <div className="list-container">
         {todoState.todoItems.map((item, i) => (
