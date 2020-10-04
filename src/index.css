@@ -29,3 +29,7 @@ code {
   font-size: 1.3em;
   color: #2f4f4f;
 }
+
+.remove-todo-item {
+  margin: 0px 5px;
+}
