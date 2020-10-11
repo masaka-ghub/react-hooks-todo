@@ -1,68 +1,191 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Todo リストチュートリアル
 
-## Available Scripts
+### 1.React プロジェクトの作成
 
-In the project directory, you can run:
+まず、React のプロジェクトを作成します。create-react-app を使います。
 
-### `yarn start`
+```
+npx create-react-app <プロジェクト名>
+npx create-react-app todo-list
+```
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+（コミットには styled-components も含めています。後で使用するかもですが、今はなくても良いです。）
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+・ここまでのコミット-> `d08d3bca8d547d27d64b792a91f1f0b1bfbafe82`
 
-### `yarn test`
+### 2.Todo リストの親コンポーネント作成
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+まずは TODO リストの親コンポーネントを作成します。  
+`/src/components/`ディレクトリ以下にコンポーネントファイルを作成します。
 
-### `yarn build`
+```TodoContainer.js
+import React from 'react';
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+const TodoContainer = () => {
+  return (
+    <>
+      <div className="list-container" />
+      <button onClick={() => alert('Todoを追加する')}>Todo追加</button>
+    </>
+  );
+};
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+export default TodoContainer;
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+単純に TODO リストを並べる箱と、追加のためのボタンを持たせているだけです。
+先頭が空のタグ`<>`になっているものは、return される要素は一つでなければならないと言う制約があるからです。不要なタグをレンダリングしたくない時に使います。`React.Fragment`でも OK です。Fragment は属性をつけることができます。
 
-### `yarn eject`
+スタイル
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```index.cssに追加
+.list-container {
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  border: solid 1px #000000;
+  width: 300px;
+  height: 480px;
+  background-color: #fff;
+}
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+これで TODO リストの親コンポーネントが作成できました。
+App.js に Todo リストコンポーネントを追加し、表示させてみます。
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+```
+import React from 'react';
+import './App.css';
+import TodoContainer from './components/TodoContainer';
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+function App() {
+  return (
+    <div className="App">
+      <TodoContainer />
+    </div>
+  );
+}
 
-## Learn More
+export default App;
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+とりあえず外枠とボタンは表示されました。  
+ボタンを押してもアラート表示がされるだけです。
 
-### Code Splitting
+・ここまでのコミット->`66ddf3ae3e6b7144b6c8a94614bd0e2e22a39249`
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+### 3-1.useState で状態を管理する
 
-### Analyzing the Bundle Size
+hooks の一つ、useState を使ってコンポーネントに状態を持たせます。  
+TodoContainer に input の入力値と、Todo リストの二つの値を定義します。
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+[useState による定義](https://github.com/masaka-ghub/react-hooks-todo/commit/8071161a48bb66eeb2355258d718884bca55de65#diff-efaef22c970cf38cd94a7e2ec3c146f8L1-R7)
 
-### Making a Progressive Web App
+```
+-import React from 'react';
++import React, { useState } from 'react';
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+ const TodoContainer = () => {
++  // 入力されたテキストを管理
++  const [input, setInput] = useState('');
++  // Todoリストを管理
++  const [todoItems, setTodoItems] = useState([]);
+```
 
-### Advanced Configuration
+input を todoItems の二つと、それぞれの setter を useState を使用して定義しました。ここでは別々の値で定義していますが、オブジェクト型として一つにまとめる事もできます。
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+`const [stateObject, setStateObject] = useState({hoge: '', fuga: {}})`...と言った感じです。  
+ただ、分けられるものは分けて定義した方が扱いやすいと思います。
 
-### Deployment
+useState は変数と setter をまとめて返します。書式は
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
+```
+const [state, setState] = useState(initialState);
+```
 
-### `yarn build` fails to minify
+です。input の初期値は\`\`, todoItems の初期値は[]として定義されました。
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+#### 3-2.setState で状態を変更する
+
+テキスト入力で input の値を、button のクリックで todoItems の追加がされるようにしてみます。
+
+[input,click のアクションで state を変化させる](https://github.com/masaka-ghub/react-hooks-todo/commit/8071161a48bb66eeb2355258d718884bca55de65#diff-efaef22c970cf38cd94a7e2ec3c146f8L1-R7)
+
+これで button のクリック時、input した入力値を todoItems に追加するようになりました。
+
+・ここまでのコミット->`22c5390232bb9f5df7596da4a527b0245b7a704e`
+
+** handson **
+
+1. ボタンをクリックして Todo リストに追加された時、入力した値が消えるようにしてください。
+2. Todo リストを全て削除するボタンを追加してください。
+
+#### 4 TodoItem を別のコンポーネントにする
+
+Todo を別のコンポーネントにしておきます。
+
+・ここまでのコミット->`a02b4b1b2847efd2acc8d5d86e94adcb318fc73a`
+
+#### 5 useEffect を使う
+
+Todo リストの件数表示を追加します。  
+まず useState を使用して、管理するメッセージを追加します。
+
+useEffect を使い、Todo リストの件数が変化した時にメッセージを変更させてみます。  
+useEffect はコンポーネントのレンダリングが完了した後に自動的に処理される hooks です。ざっくり説明すると以下のような感じです。
+
+- 第一引数は実行させたい関数
+- 第二引数は実行される条件の配列、この配列に指定した値が前回と変わっていると実行される(空配列なら初回のみ)
+- return される関数はこのコンポーネントがアンマウントされた時に実行されるクリーンアップ関数
+
+```
+useEffect(() => {
+  //　コンポーネントがレンダリングされた時に実行される
+  console.log('use effect');
+
+  return () => {} // クリーンアップ関数
+}, [/* ここに指定した値が変更されていると実行される */]);
+```
+
+クラスコンポーネントの
+
+- componentDidMount
+- componentDidUpdate
+- componentWillUnMount
+
+が一つにまとまったイメージです。
+
+ここでは、Todo リストの件数が変更されていた場合にメッセージを変化させています。  
+一般的には Ajax 処理をはじめとした非同期処理や、副作用を伴う処理は useEffect で行われます。
+
+useEffectのcleanupに関しては、別のブランチ`react-todolist-sample_useeffect-cleanup`で例を挙げています。
+`git checkout -b react-todolist-sample_useeffect-cleanup origin/react-todolist-sample_useeffect-cleanup`
+
+
+・ここまでのコミット->`86e4f43010e809e2f53a182575b2c0864ac347d0`
+
+#### 6.useReducer を使う
+
+次は useReducer です。  
+Redux で使用していたような Reducer を作成し、そこに繋げる hooks です。
+(Redux で使用していた Action,Reducer などほぼ使いまわせると思います)
+
+Redux とは異なり、useState 同様 useReducer を定義したコンポーネントに管理されます。useState より複雑な値を管理したい時に使用されます。
+
+まず、これまで useState で管理し、セッターで変更していた state を useReducer 使用に変更してみます。
+
+・ここまでのコミット->`3c53ab4f2867e738a8a9b51572583e434fa69da8`
+
+### 7.子コンポーネントから親コンポーネントの更新を行う
+
+useReducer の続きになります。
+Reducer の処理要求(dispatch)を子コンポーネントに渡せば、子のコンポーネントからコンポーネントの更新が行えます。
+
+Todo それぞれおに削除ボタンを追加してみます。  
+TodoItem コンポーネントに削除ボタンを追加しますが、クリックされた時に TodoList から自信を削除するような挙動です。  
+TodoList は親コンポーネントの useReducer によって管理されています。
+
+親コンポーネントから渡された Reducer への dispatch を使い、削除処理を実行しています。
+
+・ここまでのコミット->`6381e453ec5db80805a6f3be43a4206c68492e1a`
