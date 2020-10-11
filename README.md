@@ -66,3 +66,183 @@ This section has moved here: https://facebook.github.io/create-react-app/docs/de
 ### `yarn build` fails to minify
 
 This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+
+## Todo リストチュートリアル
+
+### 1.React プロジェクトの作成
+
+まず、React のプロジェクトを作成します。create-react-app を使います。
+
+```
+npx create-react-app <プロジェクト名>
+npx create-react-app todo-list
+```
+
+（コミットには styled-components も含めています。後で使用するかもですが、今はなくても良いです。）
+
+・ここまでのコミット-> `d08d3bca8d547d27d64b792a91f1f0b1bfbafe82`
+
+### 2.Todo リストの親コンポーネント作成
+
+まずは TODO リストの親コンポーネントを作成します。  
+`/src/components/`ディレクトリ以下にコンポーネントファイルを作成します。
+
+```TodoContainer.js
+import React from 'react';
+
+const TodoContainer = () => {
+  return (
+    <>
+      <div className="list-container" />
+      <button onClick={() => alert('Todoを追加する')}>Todo追加</button>
+    </>
+  );
+};
+
+export default TodoContainer;
+```
+
+単純に TODO リストを並べる箱と、追加のためのボタンを持たせているだけです。
+先頭が空のタグ`<>`になっているものは、return される要素は一つでなければならないと言う制約があるからです。不要なタグをレンダリングしたくない時に使います。`React.Fragment`でも OK です。Fragment は属性をつけることができます。
+
+スタイル
+
+```index.cssに追加
+.list-container {
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  border: solid 1px #000000;
+  width: 300px;
+  height: 480px;
+  background-color: #fff;
+}
+```
+
+これで TODO リストの親コンポーネントが作成できました。
+App.js に Todo リストコンポーネントを追加し、表示させてみます。
+
+```
+import React from 'react';
+import './App.css';
+import TodoContainer from './components/TodoContainer';
+
+function App() {
+  return (
+    <div className="App">
+      <TodoContainer />
+    </div>
+  );
+}
+
+export default App;
+
+```
+
+とりあえず外枠とボタンは表示されました。  
+ボタンを押してもアラート表示がされるだけです。
+
+・ここまでのコミット->`6773765678e16ffaa9e592f82d8e398358c91463`
+
+### 3-1.useState で状態を管理する
+
+hooks の一つ、useState を使ってコンポーネントに状態を持たせます。  
+TodoContainer に input の入力値と、Todo リストの二つの値を定義します。
+
+[useState による定義](https://github.com/masaka-ghub/react-hooks-todo/commit/8071161a48bb66eeb2355258d718884bca55de65#diff-efaef22c970cf38cd94a7e2ec3c146f8L1-R7)
+
+```
+-import React from 'react';
++import React, { useState } from 'react';
+
+ const TodoContainer = () => {
++  // 入力されたテキストを管理
++  const [input, setInput] = useState('');
++  // Todoリストを管理
++  const [todoItems, setTodoItems] = useState([]);
+```
+
+input を todoItems の二つと、それぞれの setter を useState を使用して定義しました。ここでは別々の値で定義していますが、オブジェクト型として一つにまとめる事もできます。
+
+`const [stateObject, setStateObject] = useState({hoge: '', fuga: {}})`...と言った感じです。  
+ただ、分けられるものは分けて定義した方が扱いやすいと思います。
+
+useState は変数と setter をまとめて返します。書式は
+
+```
+const [state, setState] = useState(initialState);
+```
+
+です。input の初期値は\`\`, todoItems の初期値は[]として定義されました。
+
+#### 3-2.setState で状態を変更する
+
+テキスト入力で input の値を、button のクリックで todoItems の追加がされるようにしてみます。
+
+[input,click のアクションで state を変化させる](https://github.com/masaka-ghub/react-hooks-todo/commit/8071161a48bb66eeb2355258d718884bca55de65#diff-efaef22c970cf38cd94a7e2ec3c146f8L1-R7)
+
+これで button のクリック時、input した入力値を todoItems に追加するようになりました。
+
+・ここまでのコミット->`8071161a48bb66eeb2355258d718884bca55de65`
+
+** handson **
+
+1. ボタンをクリックして Todo リストに追加された時、入力した値が消えるようにしてください。
+2. Todo リストを全て削除するボタンを追加してください。
+
+#### 4 TodoItem を別のコンポーネントにする
+
+Todo を別のコンポーネントにしておきます。
+
+#### 5 useEffect を使う
+
+Todo リストの件数表示を追加します。  
+まず useState を使用して、管理するメッセージを追加します。
+
+useEffect を使い、Todo リストの件数が変化した時にメッセージを変更させてみます。  
+useEffect はコンポーネントのレンダリングが完了した後に自動的に処理される hooks です。ざっくり説明すると以下のような感じです。
+
+- 第一引数は実行させたい関数
+- 第二引数は実行される条件の配列、この配列に指定した値が前回と変わっていると実行される(空配列なら初回のみ)
+- return される関数はこのコンポーネントがアンマウントされた時に実行されるクリーンアップ関数
+
+```
+useEffect(() => {
+  //　コンポーネントがレンダリングされた時に実行される
+  console.log('use effect');
+
+  return () => {} // クリーンアップ関数
+}, [/* ここに指定した値が変更されていると実行される */]);
+```
+
+クラスコンポーネントの
+
+- componentDidMount
+- componentDidUpdate
+- componentWillUnMount
+
+が一つにまとまったイメージです。
+
+ここでは、Todo リストの件数が変更されていた場合にメッセージを変化させています。  
+一般的には Ajax 処理をはじめとした非同期処理や、副作用を伴う処理は useEffect で行われます。
+
+#### 6.useReducer を使う
+
+次は useReducer です。  
+Redux で使用していたような Reducer を作成し、そこに繋げる hooks です。
+(Redux で使用していた Action,Reducer などほぼ使いまわせると思います)
+
+Redux とは異なり、useState 同様 useReducer を定義したコンポーネントに管理されます。useState より複雑な値を管理したい時に使用されます。
+
+まず、これまで useState で管理し、セッターで変更していた state を useReducer 使用に変更してみます。
+
+### 7.子コンポーネントから親コンポーネントの更新を行う
+
+useReducer の続きになります。
+Reducer の処理要求(dispatch)を子コンポーネントに渡せば、子のコンポーネントからコンポーネントの更新が行えます。
+
+Todo それぞれおに削除ボタンを追加してみます。  
+TodoItem コンポーネントに削除ボタンを追加しますが、クリックされた時に TodoList から自信を削除するような挙動です。  
+TodoList は親コンポーネントの useReducer によって管理されています。
+
+親コンポーネントから渡された Reducer への dispatch を使い、削除処理を実行しています。
