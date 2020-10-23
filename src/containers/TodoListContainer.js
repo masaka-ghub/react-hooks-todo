@@ -1,16 +1,14 @@
-import React, { useEffect, useReducer, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { TodoContext } from '../App';
 import TodoList from '../components/TodoList';
-import todoReducer from '../reducers/TodoReducer';
 
 const TodoListContainer = () => {
   // 入力されたテキストを管理
   const [input, setInput] = useState('');
+  // Appで作成したcontextを使う
+  const { todoState, dispatch } = useContext(TodoContext);
   // todoItemsとメッセージをreducerで管理する
-  const [todoState, dispatch] = useReducer(todoReducer, { todoItems: [], messge: '', lastId: 1 });
-  // Todoリストを管理
-  // const [todoItems, setTodoItems] = useState([]);
-  // 件数表示のメッセージ
-  // const [message, setMessage] = useState('');
+  // const [todoState, dispatch] = useReducer(todoReducer, { todoItems: [], messge: '', lastId: 1 });
 
   useEffect(() => {
     dispatch({ type: 'UPDATE_MESSAGE', message: `TODO LIST: ${todoState.todoItems.length}件` });
