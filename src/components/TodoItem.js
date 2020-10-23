@@ -1,11 +1,13 @@
 import React from 'react';
 
-function TodoItem({ index, value, dispatch }) {
+function TodoItem({ id, value, hasDeleteButton, buttonLabel, onDeleteClick }) {
   return (
     <div className="todo-item">
-      <button className="remove-todo-item" type="button" onClick={() => dispatch({ type: 'REMOVE_TODO', index })}>
-        削除
-      </button>
+      {hasDeleteButton && (
+        <button className="remove-todo-item" type="button" onClick={() => onDeleteClick(id)}>
+          {buttonLabel}
+        </button>
+      )}
       {value}
     </div>
   );
