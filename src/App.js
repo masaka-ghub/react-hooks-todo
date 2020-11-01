@@ -7,7 +7,7 @@ import todoReducer from './reducers/TodoReducer';
 export const TodoContext = createContext();
 
 const TodoListProvider = ({ children }) => {
-  const [todoState, dispatch] = useReducer(todoReducer, { todoItems: [], messge: '', lastId: 1 });
+  const [todoState, dispatch] = useReducer(todoReducer, { todoItems: [], messge: '' });
   return <TodoContext.Provider value={{ todoState, dispatch }}>{children}</TodoContext.Provider>;
 };
 

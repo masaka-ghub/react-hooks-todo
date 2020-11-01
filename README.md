@@ -159,9 +159,8 @@ useEffect(() => {
 ここでは、Todo リストの件数が変更されていた場合にメッセージを変化させています。  
 一般的には Ajax 処理をはじめとした非同期処理や、副作用を伴う処理は useEffect で行われます。
 
-useEffectのcleanupに関しては、別のブランチ`react-todolist-sample_useeffect-cleanup`で例を挙げています。
+useEffect の cleanup に関しては、別のブランチ`react-todolist-sample_useeffect-cleanup`で例を挙げています。
 `git checkout -b react-todolist-sample_useeffect-cleanup origin/react-todolist-sample_useeffect-cleanup`
-
 
 ・ここまでのコミット->`86e4f43010e809e2f53a182575b2c0864ac347d0`
 
@@ -189,3 +188,100 @@ TodoList は親コンポーネントの useReducer によって管理されて�
 親コンポーネントから渡された Reducer への dispatch を使い、削除処理を実行しています。
 
 ・ここまでのコミット->`6381e453ec5db80805a6f3be43a4206c68492e1a`
+
+### 8.Context API と useContext の使用
+
+異なるコンポーネント間で共通して状態を取り扱うため、context API と useContext を使用します。  
+これまでは親のコンポーネントが持っている state(TodoState)を子コンポーネントでも参照するため、props と言う形で子のコンポーネントに必要な state を渡していました。  
+useContext を使用し、Redux の様に props を介さずに異なるコンポーネントから共通の値にアクセスできる様にします。
+
+まず、context を作成します。  
+この context を export する事で、import したコンポーネントは共通的にこの context にアクセスできます。
+
+```
+export const TodoContext = createContext();
+```
+
+次に先ほど作成した TodoContext から provider を作成します。  
+この **provider に渡す value が共通管理したい値です。**  
+この例では前回に引き続き、useReducer による state を使用していますが、管理したい値が単純であれば useState でも構いません。
+
+```
+const TodoListProvider = ({ children }) => {
+  const [todoState, dispatch] = useReducer(todoReducer, { todoItems: [], messge: '', lastId: 1 });
+  // const [value, setValue] = useState('') の様なシンプルな値などでも良い
+
+  return <TodoContext.Provider value={{ todoState, dispatch }}>{children}</TodoContext.Provider>;
+};
+```
+
+※ここで出てくる children は React で用意されている[コンポジション](https://ja.reactjs.org/docs/composition-vs-inheritance.html)を利用しています。コンポーネントで囲まれた要素がそのまま入ってきます。
+
+上の例だと、このタグ`<TodoListProvier><div>何か</div></TodoListProvider>`がそのまま children として渡ってきます。
+
+作成した provider でこれまでの TodoContainer コンポーネントを囲ってあげます。
+
+```
+      <TodoListProvider>
+        <TodoMessage />
+        <TodoContainer />
+      </TodoListProvider>
+```
+
+これで、TodoContainer 側から TodoContext にアクセスする準備ができました。  
+TodoContainer 側から TodoContext にアクセスするために useContext を使用します。
+
+```
+/* TodoContainer */
+
+  // Appで作成したcontextを使う
+  const { todoState, dispatch } = useContext(TodoContext);
+```
+
+これで、App.js で用意した context に TodoContainer からアクセスできる様になりました。
+
+TodoContainer とは別のコンポーネントからもこの context を使用できる事を確認してみましょう。  
+TodoContainer 内にある、`TodoList: ~件`のメッセージを TodoContainer の外に出してみます。
+
+新たに TodoMessage.js を作成し、メッセージの表示と更新をこちらのコンポーネントに移動させます。
+
+```
+import React, { useContext, useEffect } from 'react';
+import { TodoContext } from '../App';
+
+const TodoMessage = () => {
+  // Appで作成したcontextを使う
+  const { todoState, dispatch } = useContext(TodoContext);
+
+  useEffect(() => {
+    dispatch({ type: 'UPDATE_MESSAGE', message: `TODO LIST: ${todoState.todoItems.length}件` });
+  }, [todoState.todoItems.length]);
+
+  return <p>{todoState.message}</p>;
+};
+
+export default TodoMessage;
+```
+
+ほぼ TodoContainer から切り取ってきただけですが、TodoContainer 同様`useContext(TodoContext)`が有ります。
+
+これを、TodoComponent の外に出します。
+
+```
+/* App.js */
+function App() {
+  return (
+    <div className="App">
+      <TodoListProvider>
+        <TodoMessage />
+        <TodoContainer />
+      </TodoListProvider>
+    </div>
+  );
+}
+```
+
+これで動かしてみると、これまで同様の動きを見せることと思います。  
+state を context で管理することによって、異なるコンポーネントからアクセスできる様になりました。
+
+・ここまでのコミット->`7d6d6d7b1f4d9a341ab2ca39305875f44330c985`
