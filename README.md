@@ -285,3 +285,57 @@ function App() {
 state を context で管理することによって、異なるコンポーネントからアクセスできる様になりました。
 
 ・ここまでのコミット->`7d6d6d7b1f4d9a341ab2ca39305875f44330c985`
+
+### 9. Redux を使う
+
+useContext による state 管理を Redux に変更してみます。  
+まず必要なライブラリを install します。
+
+`yarn add redux react-redux`
+
+必要なライブラリを追加したら、はじめに App.js を編集します。  
+createContext で作成していた context を、createStore により作成した store に置き換えします。  
+context ではなく store で
+
+```
+-export const TodoContext = createContext();
+-
+-const TodoListProvider = ({ children }) => {
+-  const [todoState, dispatch] = useReducer(todoReducer, { todoItems: [], messge: '' });
+-  return <TodoContext.Provider value={{ todoState, dispatch }}>{children}</TodoContext.Provider>;
+-};
+
++const store = createStore(todoReducer);
+```
+
+続いて context.Provider で括っていた部分を、react-redux の Provider に変更します。
+
+```
+-      <TodoListProvider>
++      <Provider store={store}>
+         <TodoMessage />
+         <TodoContainer />
+-      </TodoListProvider>
++      </Provider>
+```
+
+これで Provider 以下のコンポーネントから共通の store にアクセスする準備ができました。
+
+続いて reducer です。Redux を使用する場合は、state に初期値を与えます。
+
+```
+/* TodoReducer.js */
+const initialState = { todoItems: [], messge: '', lastId: 1 };
+
+const todoReducer = (state = initialState, action) => {
+...
+```
+
+TodoContainer 側では Redux を使用するために seSelector と useDispatch を追加します。  
+useSelector で store の state を、useDispatch で store への dispatch 関数に繋ぎます。
+
+context を使用していた部分を置き換えて行きます。
+
+TodoMessage の方も同様に useSelector と useDispatch に変更します。
+
+ここまでのコミット->`b879411cf5e691c1bb42006bf0e41cdda4e1e76b`
