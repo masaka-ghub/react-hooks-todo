@@ -1,14 +1,17 @@
-import React, { useContext, useState } from 'react';
-import { TodoContext } from '../App';
+import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import TodoItem from './TodoItem';
 
 const TodoContainer = () => {
   // 入力されたテキストを管理
   const [input, setInput] = useState('');
+  // useSelectorでtodoリストを参照する
+  const todoItems = useSelector(state => state.todoItems);
+
+  // useDispatchでdispatch関数を取得する
+  const dispatch = useDispatch();
   // Appで作成したcontextを使う
-  const { todoState, dispatch } = useContext(TodoContext);
-  // todoItemsとメッセージをreducerで管理する
-  // const [todoState, dispatch] = useReducer(todoReducer, { todoItems: [], messge: '' });
+  // const { todoState, dispatch } = useContext(TodoContext);
 
   const handleInput = e => {
     setInput(e.target.value);
@@ -22,7 +25,7 @@ const TodoContainer = () => {
   return (
     <>
       <div className="list-container">
-        {todoState.todoItems.map((item, i) => (
+        {todoItems.map((item, i) => (
           <TodoItem key={i} index={i} value={item} dispatch={dispatch} />
         ))}
       </div>

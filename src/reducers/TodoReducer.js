@@ -1,4 +1,6 @@
-const todoReducer = (state, action) => {
+const initialState = { todoItems: [], messge: '', lastId: 1 };
+
+const todoReducer = (state = initialState, action) => {
   switch (action.type) {
     case 'ADD_TODO':
       return { ...state, todoItems: [...state.todoItems, action.value] };

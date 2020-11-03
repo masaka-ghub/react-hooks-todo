@@ -1,23 +1,20 @@
-import React, { createContext, useReducer } from 'react';
+import React from 'react';
+import { Provider } from 'react-redux';
+import { createStore } from 'redux';
 import './App.css';
 import TodoContainer from './components/TodoContainer';
 import TodoMessage from './components/TodoMessage';
 import todoReducer from './reducers/TodoReducer';
 
-export const TodoContext = createContext();
-
-const TodoListProvider = ({ children }) => {
-  const [todoState, dispatch] = useReducer(todoReducer, { todoItems: [], messge: '' });
-  return <TodoContext.Provider value={{ todoState, dispatch }}>{children}</TodoContext.Provider>;
-};
+const store = createStore(todoReducer);
 
 function App() {
   return (
     <div className="App">
-      <TodoListProvider>
+      <Provider store={store}>
         <TodoMessage />
         <TodoContainer />
-      </TodoListProvider>
+      </Provider>
     </div>
   );
 }
